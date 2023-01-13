@@ -15,7 +15,8 @@ public class InterceptorsConfiguration extends WebMvcConfigurerAdapter {
                 .excludePathPatterns("/user/reg")
                 .excludePathPatterns("/user/auth")
                 .excludePathPatterns("/user/password/*")
-                .excludePathPatterns("/error");
+                .excludePathPatterns("/error")
+                .excludePathPatterns("/api/**");
         registry.addInterceptor(new StudentInterceptor())
                 .addPathPatterns("student/**")
                 .excludePathPatterns("user/announcement/{id}")
@@ -33,6 +34,7 @@ public class InterceptorsConfiguration extends WebMvcConfigurerAdapter {
         registry.addInterceptor(new AuthorizedInterceptor())
                 .addPathPatterns("/user/auth")
                 .addPathPatterns("/user/reg");
+//                .addPathPatterns("/api/**");
     }
 
     @Override

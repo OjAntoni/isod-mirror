@@ -5,6 +5,7 @@ import by.tms.schoolmanagementsystem.entity.announcement.AnnouncementDto;
 import by.tms.schoolmanagementsystem.entity.email.EmailMessages;
 import by.tms.schoolmanagementsystem.entity.role.Role;
 import by.tms.schoolmanagementsystem.entity.role.UserRole;
+import by.tms.schoolmanagementsystem.entity.user.Token;
 import by.tms.schoolmanagementsystem.entity.user.User;
 import by.tms.schoolmanagementsystem.entity.user.UserDataRegex;
 import by.tms.schoolmanagementsystem.entity.user.UserNewPasswordDto;
@@ -26,6 +27,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @Controller
@@ -204,6 +206,8 @@ public class UserController {
         modelAndView.setViewName("my_account");
         modelAndView.addObject("info", infoMapper.getUserInfo(user));
         modelAndView.addObject("userNewPasswordDto", new UserNewPasswordDto());
+        Token token = userService.get(user);
+        modelAndView.addObject("token", token!=null ? token.getValue().toString() : "");
         if(errorMessages != null){
             modelAndView.addObject("errorMessages", errorMessages);
         }
@@ -318,5 +322,20 @@ public class UserController {
     @GetMapping("/messages")
     public ModelAndView getMessages(HttpSession session){
         return null;
+    }
+
+    @PostMapping("/api/new")
+    public ModelAndView generateNewKey(HttpSession session){
+        User user = (User) session.getAttribute("user");
+        Token token = userService.get(user);
+        if(token==null) token = new Token(user);
+        else token.setValue(UUID.randomUUID());
+        userService.save(token);
+
+        ModelAndView mav = new ModelAndView("my_account");
+        mav.addObject("token", token.getValue().toString());
+        mav.addObject("info", infoMapper.getUserInfo(user));
+        mav.addObject("userNewPasswordDto", new UserNewPasswordDto());
+        return mav;
     }
 }

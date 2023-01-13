@@ -2,6 +2,7 @@ package by.tms.schoolmanagementsystem.entity.user;
 
 import by.tms.schoolmanagementsystem.entity.role.Role;
 import by.tms.schoolmanagementsystem.entity.role.UserRole;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import javax.persistence.*;
@@ -25,11 +26,13 @@ public class User {
     @NotNull @NotEmpty @NotBlank
     @Pattern(regexp = UserDataRegex.PASSWORD_REGEX,
             message = "Change your password")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     @NotNull @NotEmpty @NotBlank
     @Email
     private String email;
     @OneToOne
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private UserRole userRole;
 
     public Role getRole(){

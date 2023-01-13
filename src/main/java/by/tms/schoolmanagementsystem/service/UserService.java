@@ -3,6 +3,7 @@ package by.tms.schoolmanagementsystem.service;
 import by.tms.schoolmanagementsystem.entity.homework.Homework;
 import by.tms.schoolmanagementsystem.entity.lesson.Lesson;
 import by.tms.schoolmanagementsystem.entity.mark.Mark;
+import by.tms.schoolmanagementsystem.entity.user.Token;
 import by.tms.schoolmanagementsystem.entity.user.UnconfirmedUser;
 import by.tms.schoolmanagementsystem.entity.role.Role;
 import by.tms.schoolmanagementsystem.entity.role.UserRole;
@@ -17,6 +18,7 @@ import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,6 +30,7 @@ public class UserService {
     private MarkRepository markRepository;
     private LessonRepository lessonRepository;
     private HomeworkRepository homeworkRepository;
+    private TokenRepository tokenRepository;
 
     public Optional<User> findById(long id){
         return userRepository.findById(id);
@@ -39,6 +42,12 @@ public class UserService {
         } else {
             return userRepository.getByUsername(username);
         }
+    }
+
+    public User findByToken(String token){
+        Token t = tokenRepository.findTokenByValue(UUID.fromString(token));
+        if(t==null) return null;
+        return t.getUser();
     }
 
     public boolean existsByUsername(String username){
@@ -93,6 +102,8 @@ public class UserService {
         }
         if (userRepository.existsById(id)){
             User byId = userRepository.getById(id);
+            Token token = tokenRepository.findTokenByUser(byId);
+            tokenRepository.delete(token);
             if(byId.getRole()==Role.Student){
                 markRepository.deleteAllByUser(byId);
                 ArrayList<Lesson> lessons = lessonRepository.findAllByStudentsContains(byId);
@@ -115,6 +126,14 @@ public class UserService {
 
     public List<User> getAll(Role role){
         return getConfirmedUsers().stream().filter(user -> user.getRole() == role).collect(Collectors.toList());
+    }
+
+    public void save(Token token){
+        tokenRepository.save(token);
+    }
+
+    public Token get(User user){
+        return tokenRepository.findTokenByUser(user);
     }
 
 }
